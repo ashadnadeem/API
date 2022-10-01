@@ -12,7 +12,10 @@ module.exports = {
                 audience: userId,
             };
             JWT.sign(payload, secret, options, (err, token) => {
-                if(err) reject(create_error.InternalServerError());
+                if(err) {
+                    console.log(err.message);
+                    reject(create_error.InternalServerError());
+                }
                 resolve(token);
             });
         });

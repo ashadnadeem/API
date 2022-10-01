@@ -34,7 +34,28 @@ router.post('/register', async(req, res, next) => {
 
 // Login Route
 router.post('/login', async(req, res, next) => {
-    res.send('Login Route');
+    try {
+        // validate the email and password
+        const validReq = await authSchema.validateAsync(req.body);
+
+        // Check if user exists
+        const user = await User.findOne({email: validReq.email});
+        if(!user) throw create_error.NotFound('User not registered');
+
+        // Check if password is correct
+        const isMatched = await user.isValidPassword(validReq.password);
+        if(!isMatched) throw create_error.Unauthorized('Username/Password not valid');
+
+        // Generate JWT access token
+        const accessToken = await signAccessToken(user.id);
+
+        res.send({accessToken});
+
+    } catch (error) {
+        // Check if error is from joi validation then send unaccessible property error
+        if(error.isJoi === true) next(create_error.BadRequest("Invalid Email or Password"));
+        next(error);
+    }
 });
 
 // refresh token Route

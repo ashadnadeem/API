@@ -17,6 +17,14 @@ Content-Type: application/json
 
 ### Route to test auth/login
 POST  http://localhost:3000/auth/login
+# Header
+Content-Type: application/json
+
+# Body
+{
+    "email": "user@mail.com",
+    "password": "verysecured"
+}
 
 ### Route to test auth/refresh_token
 POST  http://localhost:3000/auth/refresh_token
