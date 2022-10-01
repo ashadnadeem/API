@@ -7,7 +7,7 @@ const User = require('../Models/user.model');
 // Import the validation schema
 const {authSchema} = require('../helpers/validation_schema');
 // Import the JWT helper
-const {signAccessToken} = require('../helpers/jwt_helper');
+const {signAccessToken, signRefreshToken, verifyRefreshToken} = require('../helpers/jwt_helper');
 
 // Register Route
 router.post('/register', async(req, res, next) => {
@@ -22,9 +22,11 @@ router.post('/register', async(req, res, next) => {
         // Create new user
         const user = User(validReq);
         const saved = await user.save();
-        // Generate JWT access token
+        // Generate JWT access tokens{accessToken, refreshToken}
         const accessToken = await signAccessToken(saved.id);
-        res.send({accessToken});
+        const refreshToken = await signRefreshToken(saved.id);
+        // Send the tokens to the client
+        res.send({accessToken, refreshToken});
     } catch (error) {
         // Check if error is from joi validation then send unaccessible property error
         if(error.isJoi === true) error.status = 422;
@@ -46,10 +48,11 @@ router.post('/login', async(req, res, next) => {
         const isMatched = await user.isValidPassword(validReq.password);
         if(!isMatched) throw create_error.Unauthorized('Username/Password not valid');
 
-        // Generate JWT access token
+        // Generate JWT access tokens{accessToken, refreshToken}
         const accessToken = await signAccessToken(user.id);
-
-        res.send({accessToken});
+        const refreshToken = await signRefreshToken(user.id);
+        // Send the tokens
+        res.send({accessToken, refreshToken});
 
     } catch (error) {
         // Check if error is from joi validation then send unaccessible property error
@@ -60,7 +63,20 @@ router.post('/login', async(req, res, next) => {
 
 // refresh token Route
 router.post('/refresh_token', async(req, res, next) => {
-    res.send('Refresh Token Route');
+    try {
+        let {refreshToken} = req.body;
+        if(!refreshToken) throw create_error.BadRequest();
+        // Verify the refresh token
+        const userID = await verifyRefreshToken(refreshToken);
+
+        // Generate new access tokens{accessToken, refreshToken}
+        const accessToken = await signAccessToken(userID);
+        refreshToken = await signRefreshToken(userID);
+        // Send the new access token and refresh token
+        res.send({accessToken, refreshToken});
+    } catch (error) {
+        next(error);
+    }
 });
 
 // Logout Route

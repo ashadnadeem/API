@@ -3,7 +3,7 @@ GET http://localhost:3000
 
 ### Protected route
 GET http://localhost:3000
-Authorization: Bearer <Token>
+Authorization: Bearer <accessToken>
 
 ### Route to test the error not found
 GET http://localhost:3000/health
@@ -32,6 +32,13 @@ Content-Type: application/json
 
 ### Route to test auth/refresh_token
 POST  http://localhost:3000/auth/refresh_token
+# Header
+Content-Type: application/json
+
+# Body
+{
+    "refresh_token": "<refreshToken>"
+}
 
 ### Route to test auth/logout
 DELETE   http://localhost:3000/auth/logout
