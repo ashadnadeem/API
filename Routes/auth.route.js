@@ -6,6 +6,8 @@ const create_error = require('http-errors');
 const User = require('../Models/user.model');
 // Import the validation schema
 const {authSchema} = require('../helpers/validation_schema');
+// Import the JWT helper
+const {signAccessToken} = require('../helpers/jwt_helper');
 
 // Register Route
 router.post('/register', async(req, res, next) => {
@@ -20,8 +22,9 @@ router.post('/register', async(req, res, next) => {
         // Create new user
         const user = User(validReq);
         const saved = await user.save();
-
-        res.send(saved);
+        // Generate JWT access token
+        const accessToken = await signAccessToken(saved.id);
+        res.send({accessToken});
     } catch (error) {
         // Check if error is from joi validation then send unaccessible property error
         if(error.isJoi === true) error.status = 422;
