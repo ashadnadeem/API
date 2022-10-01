@@ -6,6 +6,14 @@ GET http://localhost:3000/health
 
 ### Route to test auth/register
 POST  http://localhost:3000/auth/register
+# Header
+Content-Type: application/json
+
+# Body
+{
+    "email": "user@mail.com",
+    "password": "verysecured"
+}
 
 ### Route to test auth/login
 POST  http://localhost:3000/auth/login
