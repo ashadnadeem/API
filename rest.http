@@ -1,6 +1,10 @@
 ### Default route
 GET http://localhost:3000
 
+### Protected route
+GET http://localhost:3000
+Authorization: Bearer <Token>
+
 ### Route to test the error not found
 GET http://localhost:3000/health
 

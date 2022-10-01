@@ -19,5 +19,20 @@ module.exports = {
                 resolve(token);
             });
         });
+    },
+    verifyAccessToken: (req, res, next) => {
+        if(!req.headers['authorization']) return next(create_error.Unauthorized());
+        const authHeader = req.headers['authorization'];
+        const bearerToken = authHeader.split(' ');
+        const token = bearerToken[1];
+        const secret = process.env.ACCESS_TOKEN_SECRET;
+        JWT.verify(token, secret, (err, payload) => {
+            if(err) {
+                const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
+                return next(create_error.Unauthorized(message));
+            }
+            req.payload = payload;
+            next();
+        });
     }
 };
