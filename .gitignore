@@ -3,4 +3,4 @@ node_modules/
 # Enviromental variables
 .env
 # Logs
-logs
+*.log

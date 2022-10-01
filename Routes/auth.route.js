@@ -1,26 +1,30 @@
+// Import the modules from package
 const express = require('express');
 const router = express.Router();
 const create_error = require('http-errors');
+// Import the Data Models
 const User = require('../Models/user.model');
+// Import the validation schema
+const {authSchema} = require('../helpers/validation_schema');
 
 // Register Route
 router.post('/register', async(req, res, next) => {
     try {
-        // Unwrap json body
-        const {email, password} = req.body;
-        // Check if email and password both are provided
-        if(!email || ! password) throw create_error.BadRequest();
-
+        // Validate the email and password
+        const validReq = await authSchema.validateAsync(req.body);
+        console.log(validReq);
         // Check if user already exists
-        const doesExist = await User.findOne({email});
-        if(doesExist) throw create_error.Conflict(`A user with ${email} is already registered`);
+        const doesExist = await User.findOne({email: validReq.email});
+        if(doesExist) throw create_error.Conflict(`A user with ${validReq.email} is already registered`);
         
         // Create new user
-        const user = User({email, password});
+        const user = User(validReq);
         const saved = await user.save();
 
         res.send(saved);
     } catch (error) {
+        // Check if error is from joi validation then send unaccessible property error
+        if(error.isJoi === true) error.status = 422;
         next(error);
     }
 });
