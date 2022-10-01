@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const create_error = require('http-errors');
+const JWT = require('jsonwebtoken');
 // Import the Data Models
 const User = require('../Models/user.model');
 
@@ -18,6 +19,24 @@ router.get('/getAll', async(req, res, next) => {
         });
 
         res.send({users: result});
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Get my details
+router.get('/getMyDetails', async(req, res, next) => {
+    try {
+        const token = req.headers['authorization'].split(' ')[1];
+        const secret = process.env.ACCESS_TOKEN_SECRET;
+        const payload = JWT.verify(token, secret);
+        const id = payload.aud;
+        const user = await User.findOne({_id: id});
+        if(!user) return next(create_error.NotFound('User not found'));
+        res.send({
+            id: user._id,
+            email: user.email,
+        });
     } catch (error) {
         next(error);
     }
