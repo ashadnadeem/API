@@ -5,7 +5,6 @@ require('dotenv').config();
 require('./helpers/init_mongodb');
 
 const Auth_Route = require('./Routes/auth.route');
-const User_Route = require('./Routes/user.route');
 
 const {verifyAccessToken} = require('./helpers/jwt_helper');
 
@@ -18,9 +17,6 @@ app.use(express.urlencoded({extended:true}));
 app.get('/', verifyAccessToken, async(req, res, next) => {
     res.send('Hello World! \nYou are at the root route\nYou have Authorised access.');
 });
-
-// Users Route
-app.use('/user', verifyAccessToken, User_Route);
 
 // Auth Route
 app.use('/auth', Auth_Route);
